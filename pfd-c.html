@@ -1,0 +1,1567 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Analisis Data PFD Ruang C — Praktikum Fisika Dasar</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <!-- KaTeX Math Rendering -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" />
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap");
+      body {
+        font-family: "Plus Jakarta Sans", sans-serif;
+      }
+      .glass-nav {
+        background: rgba(15, 23, 42, 0.95);
+        backdrop-filter: blur(12px);
+      }
+    </style>
+  </head>
+  <body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col antialiased">
+    <!-- ==================== HEADER & NAVBAR ==================== -->
+    <header class="glass-nav text-white sticky top-0 z-50 shadow-md border-b border-slate-700/50">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3.5 flex flex-col md:flex-row items-center justify-between gap-3">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-cyan-400 flex items-center justify-center text-white shadow-lg">
+            <i class="fa-solid fa-atom text-xl"></i>
+          </div>
+          <div>
+            <h1 class="text-lg font-bold tracking-tight">Fisika Dasar — Ruang C</h1>
+            <p class="text-xs text-slate-400">Analisis Data, Konversi Satuan, Ketidakpastian & Regresi Linear</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2 text-xs bg-slate-800/80 px-3 py-1.5 rounded-lg border border-slate-700 text-slate-300">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span>Mendukung Penambahan Data & Multi-Satuan</span>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <nav class="max-w-7xl mx-auto px-4 sm:px-6 flex overflow-x-auto gap-1.5 pb-2 scrollbar-none">
+        <button onclick="switchTab('m3')" id="tab-m3" class="nav-btn px-4 py-2 rounded-lg font-medium text-xs sm:text-sm transition-all bg-blue-600 text-white shadow">
+          <i class="fa-solid fa-arrows-split-up-and-left mr-1.5"></i> M3: Energi & Momentum
+        </button>
+        <button onclick="switchTab('m2')" id="tab-m2" class="nav-btn px-4 py-2 rounded-lg font-medium text-xs sm:text-sm transition-all text-slate-300 hover:bg-slate-800"><i class="fa-solid fa-rotate mr-1.5"></i> M2: Giroskop</button>
+        <button onclick="switchTab('p1_balok')" id="tab-p1_balok" class="nav-btn px-4 py-2 rounded-lg font-medium text-xs sm:text-sm transition-all text-slate-300 hover:bg-slate-800">
+          <i class="fa-solid fa-cube mr-1.5"></i> P1.1: Balok Kayu
+        </button>
+        <button onclick="switchTab('p1_silinder')" id="tab-p1_silinder" class="nav-btn px-4 py-2 rounded-lg font-medium text-xs sm:text-sm transition-all text-slate-300 hover:bg-slate-800">
+          <i class="fa-solid fa-database mr-1.5"></i> P1.2: Silinder Logam
+        </button>
+        <button onclick="switchTab('p1_pasir')" id="tab-p1_pasir" class="nav-btn px-4 py-2 rounded-lg font-medium text-xs sm:text-sm transition-all text-slate-300 hover:bg-slate-800">
+          <i class="fa-solid fa-flask mr-1.5"></i> P1.3: Pasir (Piknometer)
+        </button>
+        <button onclick="switchTab('p1_spirtus')" id="tab-p1_spirtus" class="nav-btn px-4 py-2 rounded-lg font-medium text-xs sm:text-sm transition-all text-slate-300 hover:bg-slate-800">
+          <i class="fa-solid fa-scale-balanced mr-1.5"></i> P1.4: Spirtus (Mohr)
+        </button>
+      </nav>
+    </header>
+
+    <!-- ==================== MAIN CONTENT ==================== -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 py-6">
+      <!-- ==================== MODUL M3: ENERGI DAN MOMENTUM ==================== -->
+      <section id="section-m3" class="tab-content space-y-6">
+        <div class="bg-white p-5 sm:p-6 rounded-2xl shadow-sm border border-slate-200">
+          <!-- Header Section -->
+          <div class="flex flex-col lg:flex-row lg:items-center justify-between pb-4 border-b border-slate-100 gap-4">
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="px-2.5 py-1 bg-blue-100 text-blue-700 rounded-md text-xs font-extrabold uppercase">Modul M3</span>
+                <h2 class="text-xl font-bold text-slate-800">Energi dan Momentum (Tumbukan 1 Dimensi)</h2>
+              </div>
+              <p class="text-xs text-slate-500 mt-1">Menentukan kecepatan sebelum/sesudah tumbukan, Koefisien Restitusi ($e$), rata-rata ($\bar{e}$), dan ketidakpastian ($\Delta e$).</p>
+            </div>
+            <div class="flex flex-wrap items-center gap-2">
+              <button onclick="addM3Row()" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold flex items-center gap-1.5 transition shadow-sm">
+                <i class="fa-solid fa-plus"></i> Tambah Baris
+              </button>
+              <button onclick="removeM3LastRow()" class="px-3 py-1.5 bg-rose-50 text-rose-600 hover:bg-rose-100 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition"><i class="fa-solid fa-minus"></i> Hapus Baris</button>
+              <button onclick="loadSampleM3()" class="px-3 py-1.5 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition"><i class="fa-solid fa-magic"></i> Contoh Data</button>
+              <button onclick="resetM3()" class="px-3 py-1.5 bg-slate-100 text-slate-600 hover:bg-slate-200 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition"><i class="fa-solid fa-rotate-left"></i> Reset</button>
+            </div>
+          </div>
+
+          <!-- Formula Display Card -->
+          <div class="mt-4 p-4 bg-slate-50 rounded-xl border border-slate-200 text-xs">
+            <div class="font-bold text-slate-700 mb-2 flex items-center gap-1.5"><i class="fa-solid fa-square-root-variable text-blue-600"></i> Rumus & Formula yang Digunakan:</div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <div class="p-2.5 bg-white rounded-lg border border-slate-200">
+                <p class="text-[11px] text-slate-500 font-semibold mb-1">1. Kecepatan Benda ($V$):</p>
+                <div>$$V_P = \frac{x}{t_P}, \quad V_P' = \frac{x}{t_P'}, \quad V_Q = \frac{x}{t_Q}, \quad V_Q' = \frac{x}{t_Q'}$$</div>
+              </div>
+              <div class="p-2.5 bg-white rounded-lg border border-slate-200">
+                <p class="text-[11px] text-slate-500 font-semibold mb-1">2. Koefisien Restitusi ($e$):</p>
+                <div>$$e = -\frac{V_P' - V_Q'}{V_P - V_Q} \quad (0 < e < 1)$$</div>
+              </div>
+              <div class="p-2.5 bg-white rounded-lg border border-slate-200">
+                <p class="text-[11px] text-slate-500 font-semibold mb-1">3. Rata-rata, $\Delta e$, dan $\%Kr$:</p>
+                <div>$$\bar{e} = \frac{\sum e}{n}, \quad \Delta e = \sqrt{\frac{\sum e^2 - n(\bar{e})^2}{n - 1}}, \quad \%Kr = \left|\frac{\Delta e}{\bar{e}}\right|\times 100\%$$</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Parameters & Unit Selection -->
+          <div class="mt-4 p-4 bg-blue-50/60 rounded-xl border border-blue-100 flex flex-wrap items-center gap-6 text-xs">
+            <div>
+              <label class="block font-semibold text-slate-700 mb-1">Panjang Penghalang / Objek ($x$)</label>
+              <div class="flex items-center gap-1.5">
+                <input type="number" id="m3-x-val" value="0.1" step="0.001" oninput="calculateM3()" class="w-24 px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg text-xs font-semibold focus:ring-2 focus:ring-blue-500" />
+                <select id="m3-x-unit" onchange="calculateM3()" class="px-2 py-1.5 bg-white border border-slate-300 rounded-lg font-semibold text-xs">
+                  <option value="1" selected>meter (m)</option>
+                  <option value="0.01">centimeter (cm)</option>
+                  <option value="0.001">millimeter (mm)</option>
+                </select>
+              </div>
+            </div>
+            <div>
+              <label class="block font-semibold text-slate-700 mb-1">Satuan Waktu Input ($t$)</label>
+              <select id="m3-t-unit" onchange="calculateM3()" class="px-3 py-1.5 bg-white border border-slate-300 rounded-lg font-semibold text-xs">
+                <option value="1" selected>Detik / Sekon (s)</option>
+                <option value="0.001">Milidetik (ms)</option>
+              </select>
+            </div>
+            <div class="ml-auto text-right">
+              <span class="text-slate-500 block">Jumlah Data Aktif:</span>
+              <span id="m3-data-count" class="text-sm font-bold text-blue-700">10 Baris</span>
+            </div>
+          </div>
+
+          <!-- Dynamic Input Table -->
+          <div class="mt-4 overflow-x-auto">
+            <table class="w-full text-center text-xs border-collapse">
+              <thead>
+                <tr class="bg-slate-100 text-slate-700 uppercase font-semibold">
+                  <th rowspan="2" class="p-2 border border-slate-200 w-10">No</th>
+                  <th colspan="2" class="p-2 border border-slate-200 bg-blue-50 text-blue-900">Benda P: Waktu $t$</th>
+                  <th colspan="2" class="p-2 border border-slate-200 bg-indigo-50 text-indigo-900">Benda Q: Waktu $t$</th>
+                  <th colspan="4" class="p-2 border border-slate-200 bg-amber-50 text-amber-900">Kecepatan (m/s)</th>
+                  <th rowspan="2" class="p-2 border border-slate-200 bg-emerald-50 text-emerald-900">Koef. $e$</th>
+                  <th rowspan="2" class="p-2 border border-slate-200 bg-emerald-100 text-emerald-900">$e^2$</th>
+                  <th rowspan="2" class="p-2 border border-slate-200 w-10">Aksi</th>
+                </tr>
+                <tr class="bg-slate-50 text-[11px]">
+                  <th class="p-1.5 border border-slate-200">Sebelum ($t_P$)</th>
+                  <th class="p-1.5 border border-slate-200">Sesudah ($t_P'$)</th>
+                  <th class="p-1.5 border border-slate-200">Sebelum ($t_Q$)</th>
+                  <th class="p-1.5 border border-slate-200">Sesudah ($t_Q'$)</th>
+                  <th class="p-1.5 border border-slate-200">$V_P$</th>
+                  <th class="p-1.5 border border-slate-200">$V_P'$</th>
+                  <th class="p-1.5 border border-slate-200">$V_Q$</th>
+                  <th class="p-1.5 border border-slate-200">$V_Q'$</th>
+                </tr>
+              </thead>
+              <tbody id="m3-tbody">
+                <!-- Dynamically Populated -->
+              </tbody>
+              <tfoot>
+                <tr class="bg-slate-100 font-bold text-slate-800">
+                  <td colspan="9" class="p-2 border border-slate-200 text-right">TOTAL ($\sum$):</td>
+                  <td id="m3-sum-e" class="p-2 border border-slate-200 text-emerald-700 font-mono">-</td>
+                  <td id="m3-sum-e2" class="p-2 border border-slate-200 text-emerald-700 font-mono">-</td>
+                  <td class="p-2 border border-slate-200"></td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+
+          <!-- Result Cards -->
+          <div class="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div class="p-4 bg-emerald-50 rounded-xl border border-emerald-100">
+              <span class="text-xs font-semibold text-emerald-700 uppercase">Rata-rata Koefisien ($\bar{e}$)</span>
+              <div id="m3-res-ebar" class="text-2xl font-black text-emerald-950 mt-1">-</div>
+              <p class="text-[11px] text-emerald-600 mt-1">$\bar{e} = \frac{\sum e}{n}$</p>
+            </div>
+            <div class="p-4 bg-emerald-50 rounded-xl border border-emerald-100">
+              <span class="text-xs font-semibold text-emerald-700 uppercase">Ketidakpastian Mutlak ($\Delta e$)</span>
+              <div id="m3-res-deltae" class="text-2xl font-black text-emerald-950 mt-1">-</div>
+              <p class="text-[11px] text-emerald-600 mt-1">Standar deviasi tunggal</p>
+            </div>
+            <div class="p-4 bg-emerald-50 rounded-xl border border-emerald-100">
+              <span class="text-xs font-semibold text-emerald-700 uppercase">Ketidakpastian Relatif (%Kr)</span>
+              <div id="m3-res-pkr" class="text-2xl font-black text-emerald-950 mt-1">-</div>
+              <p class="text-[11px] text-emerald-600 mt-1">$\%Kr = |\frac{\Delta e}{\bar{e}}| \times 100\%$</p>
+            </div>
+          </div>
+
+          <!-- Copyable Report -->
+          <div class="mt-6 p-4 bg-slate-900 rounded-xl text-slate-100">
+            <div class="flex justify-between items-center mb-2">
+              <span class="text-xs font-mono text-cyan-400 font-semibold"><i class="fa-solid fa-clipboard mr-1.5"></i> FORMAT HASIL LAPORAN RESMI (M3):</span>
+              <button onclick="copyToClipboard('m3-report-text')" class="text-xs bg-slate-800 hover:bg-slate-700 px-3 py-1 rounded-md text-slate-200 transition">Salin Teks</button>
+            </div>
+            <pre id="m3-report-text" class="font-mono text-xs whitespace-pre-wrap leading-relaxed text-slate-300">Harap lengkapi baris data...</pre>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== MODUL M2: GIROSKOP ==================== -->
+      <section id="section-m2" class="tab-content hidden space-y-6">
+        <div class="bg-white p-5 sm:p-6 rounded-2xl shadow-sm border border-slate-200">
+          <!-- Header -->
+          <div class="flex flex-col lg:flex-row lg:items-center justify-between pb-4 border-b border-slate-100 gap-4">
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="px-2.5 py-1 bg-indigo-100 text-indigo-700 rounded-md text-xs font-extrabold uppercase">Modul M2</span>
+                <h2 class="text-xl font-bold text-slate-800">Giroskop (Regresi Linear & Momen Inersia)</h2>
+              </div>
+              <p class="text-xs text-slate-500 mt-1">Menentukan Regresi Linear $y = mx + n$, Inersia $I_P$, Ketidakpastian $\Delta I_P$, dan $\%error$.</p>
+            </div>
+            <div class="flex flex-wrap items-center gap-2">
+              <button onclick="addM2Row()" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold flex items-center gap-1.5 transition shadow-sm">
+                <i class="fa-solid fa-plus"></i> Tambah Baris
+              </button>
+              <button onclick="removeM2LastRow()" class="px-3 py-1.5 bg-rose-50 text-rose-600 hover:bg-rose-100 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition"><i class="fa-solid fa-minus"></i> Hapus Baris</button>
+              <button onclick="loadSampleM2()" class="px-3 py-1.5 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition"><i class="fa-solid fa-magic"></i> Contoh Data</button>
+              <button onclick="resetM2()" class="px-3 py-1.5 bg-slate-100 text-slate-600 hover:bg-slate-200 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition"><i class="fa-solid fa-rotate-left"></i> Reset</button>
+            </div>
+          </div>
+
+          <!-- Formula Display Card -->
+          <div class="mt-4 p-4 bg-slate-50 rounded-xl border border-slate-200 text-xs">
+            <div class="font-bold text-slate-700 mb-2 flex items-center gap-1.5"><i class="fa-solid fa-square-root-variable text-indigo-600"></i> Rumus & Penurunan Matematika:</div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <div class="p-2.5 bg-white rounded-lg border border-slate-200">
+                <p class="text-[11px] text-slate-500 font-semibold mb-1">1. Regresi Linear & Ketidakpastian:</p>
+                <div>$$m = \frac{n\sum xy - \sum x\sum y}{n\sum x^2 - (\sum x)^2}, \quad S_m = \sqrt{\frac{n}{n\sum x^2 - (\sum x)^2}} S_y$$</div>
+              </div>
+              <div class="p-2.5 bg-white rounded-lg border border-slate-200">
+                <p class="text-[11px] text-slate-500 font-semibold mb-1">2. Momen Inersia ($I_P$):</p>
+                <div>$$I_P = \frac{m' r^2 (m \cdot g - 2)}{2}$$</div>
+              </div>
+              <div class="p-2.5 bg-white rounded-lg border border-slate-200">
+                <p class="text-[11px] text-slate-500 font-semibold mb-1">3. Ketidakpastian $\Delta I_P$:</p>
+                <div>$$\Delta I_P = \sqrt{\left|\frac{1}{2}gr^2m'\right|^2 S_m^2 + \left|\frac{1}{2}gMr^2 - r^2\right|^2 (\Delta m')^2 + |gMrm'-2rm'|^2 (\Delta r)^2}$$</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Parameters with Unit Converters -->
+          <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 p-4 bg-indigo-50/50 rounded-xl border border-indigo-100 text-xs">
+            <div>
+              <label class="block font-semibold text-slate-700 mb-1">Massa Beban ($m'$)</label>
+              <div class="flex items-center gap-1">
+                <input type="number" id="m2-m-val" value="50" step="0.1" oninput="calculateM2()" class="w-full px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg font-semibold" />
+                <select id="m2-m-unit" onchange="calculateM2()" class="px-2 py-1.5 bg-white border border-slate-300 rounded-lg font-semibold text-xs">
+                  <option value="0.001" selected>gram (g)</option>
+                  <option value="1">kilogram (kg)</option>
+                </select>
+              </div>
+              <p class="text-[10px] text-slate-500 mt-1">Ketelitian Neraca: $\Delta m' = 0.05\text{ g}$</p>
+            </div>
+
+            <div>
+              <label class="block font-semibold text-slate-700 mb-1">Jari-jari Giroskop ($r$)</label>
+              <div class="flex items-center gap-1">
+                <input type="number" id="m2-r-val" value="4.5" step="0.01" oninput="calculateM2()" class="w-full px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg font-semibold" />
+                <select id="m2-r-unit" onchange="calculateM2()" class="px-2 py-1.5 bg-white border border-slate-300 rounded-lg font-semibold text-xs">
+                  <option value="0.01" selected>cm</option>
+                  <option value="0.001">mm</option>
+                  <option value="1">meter (m)</option>
+                </select>
+              </div>
+              <p class="text-[10px] text-slate-500 mt-1">Ketelitian Mistar: $\Delta r = 0.5\text{ mm}$</p>
+            </div>
+
+            <div>
+              <label class="block font-semibold text-slate-700 mb-1">Satuan Tinggi $h$ & Waktu $t_f$</label>
+              <div class="grid grid-cols-2 gap-1">
+                <select id="m2-h-unit" onchange="calculateM2()" class="px-2 py-1.5 bg-white border border-slate-300 rounded-lg font-semibold text-xs">
+                  <option value="1" selected>h (meter)</option>
+                  <option value="0.01">h (cm)</option>
+                </select>
+                <select id="m2-tf-unit" onchange="calculateM2()" class="px-2 py-1.5 bg-white border border-slate-300 rounded-lg font-semibold text-xs">
+                  <option value="1" selected>tf (detik)</option>
+                  <option value="0.001">tf (ms)</option>
+                </select>
+              </div>
+              <p class="text-[10px] text-slate-500 mt-1">Gravitasi $g = 10\text{ m/s}^2$</p>
+            </div>
+
+            <div>
+              <label class="block font-semibold text-slate-700 mb-1">$I_P$ Literatur</label>
+              <input type="number" id="m2-ilit" value="0.00883" step="0.00001" oninput="calculateM2()" class="w-full px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg font-semibold" />
+              <p class="text-[10px] text-slate-500 mt-1">Nilai baku: $8.83 \times 10^{-3}\text{ kg}\cdot\text{m}^2$</p>
+            </div>
+          </div>
+
+          <!-- Table and Chart Grid -->
+          <div class="mt-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <div class="lg:col-span-7 overflow-x-auto">
+              <table class="w-full text-center text-xs border-collapse">
+                <thead>
+                  <tr class="bg-slate-100 text-slate-700 uppercase font-semibold">
+                    <th class="p-2 border border-slate-200 w-10">No</th>
+                    <th class="p-2 border border-slate-200">$x = h$</th>
+                    <th class="p-2 border border-slate-200">$t_f$</th>
+                    <th class="p-2 border border-slate-200 bg-indigo-50">$y = t_f^2\text{ (s}^2\text{)}$</th>
+                    <th class="p-2 border border-slate-200">$x^2$</th>
+                    <th class="p-2 border border-slate-200">$y^2$</th>
+                    <th class="p-2 border border-slate-200">$xy$</th>
+                    <th class="p-2 border border-slate-200 w-10">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody id="m2-tbody">
+                  <!-- Dynamically Populated -->
+                </tbody>
+                <tfoot>
+                  <tr class="bg-slate-100 font-bold text-indigo-950 font-mono">
+                    <td class="p-2 border border-slate-200">$\sum$</td>
+                    <td id="m2-sum-x" class="p-2 border border-slate-200">-</td>
+                    <td class="p-2 border border-slate-200">-</td>
+                    <td id="m2-sum-y" class="p-2 border border-slate-200 text-indigo-600">-</td>
+                    <td id="m2-sum-x2" class="p-2 border border-slate-200">-</td>
+                    <td id="m2-sum-y2" class="p-2 border border-slate-200">-</td>
+                    <td id="m2-sum-xy" class="p-2 border border-slate-200">-</td>
+                    <td class="p-2 border border-slate-200"></td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+
+            <!-- Chart Box with Download Button -->
+            <div class="lg:col-span-5 bg-slate-50 p-4 rounded-xl border border-slate-200 flex flex-col justify-between">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-xs font-bold text-slate-700 flex items-center gap-1.5"> <i class="fa-solid fa-chart-line text-indigo-600"></i> Grafik Regresi $h$ vs $t_f^2$ </span>
+                <button onclick="downloadM2Chart()" class="px-2.5 py-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded text-[11px] font-semibold flex items-center gap-1 shadow transition">
+                  <i class="fa-solid fa-download"></i> Download Grafik (PNG)
+                </button>
+              </div>
+              <div class="text-[11px] font-mono text-indigo-700 mb-2 font-semibold" id="m2-reg-eq">y = mx + n</div>
+              <div class="relative h-60 w-full bg-white p-2 rounded-lg border border-slate-200">
+                <canvas id="m2Chart"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <!-- M2 Results -->
+          <div class="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="p-4 bg-indigo-50 rounded-xl border border-indigo-100">
+              <span class="text-xs font-semibold text-indigo-600 uppercase">Gradien Regresi ($m$)</span>
+              <div id="m2-res-m" class="text-xl font-bold text-indigo-950 mt-1">-</div>
+              <span id="m2-res-sm" class="text-xs text-indigo-600">$S_m = \dots$</span>
+            </div>
+            <div class="p-4 bg-indigo-50 rounded-xl border border-indigo-100">
+              <span class="text-xs font-semibold text-indigo-600 uppercase">Intercept Regresi ($n$)</span>
+              <div id="m2-res-n" class="text-xl font-bold text-indigo-950 mt-1">-</div>
+              <span id="m2-res-sn" class="text-xs text-indigo-600">$S_n = \dots$</span>
+            </div>
+            <div class="p-4 bg-purple-50 rounded-xl border border-purple-100">
+              <span class="text-xs font-semibold text-purple-600 uppercase">Momen Inersia ($I_P$)</span>
+              <div id="m2-res-ip" class="text-xl font-bold text-purple-950 mt-1">-</div>
+              <span id="m2-res-deltaip" class="text-xs text-purple-600">$\Delta I_P = \dots$</span>
+            </div>
+            <div class="p-4 bg-purple-50 rounded-xl border border-purple-100">
+              <span class="text-xs font-semibold text-purple-600 uppercase">Persentase Kesalahan (%Error)</span>
+              <div id="m2-res-error" class="text-xl font-bold text-purple-950 mt-1">-</div>
+              <span class="text-xs text-purple-600">Terhadap nilai literatur</span>
+            </div>
+          </div>
+
+          <!-- Copyable Report -->
+          <div class="mt-6 p-4 bg-slate-900 rounded-xl text-slate-100">
+            <div class="flex justify-between items-center mb-2">
+              <span class="text-xs font-mono text-cyan-400 font-semibold"><i class="fa-solid fa-clipboard mr-1.5"></i> FORMAT HASIL LAPORAN RESMI (M2):</span>
+              <button onclick="copyToClipboard('m2-report-text')" class="text-xs bg-slate-800 hover:bg-slate-700 px-3 py-1 rounded-md text-slate-200 transition">Salin Teks</button>
+            </div>
+            <pre id="m2-report-text" class="font-mono text-xs whitespace-pre-wrap leading-relaxed text-slate-300">Harap lengkapi baris data...</pre>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== MODUL P1.1: BALOK KAYU ==================== -->
+      <section id="section-p1_balok" class="tab-content hidden space-y-6">
+        <div class="bg-white p-5 sm:p-6 rounded-2xl shadow-sm border border-slate-200">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 gap-3">
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="px-2.5 py-1 bg-amber-100 text-amber-700 rounded-md text-xs font-extrabold uppercase">Modul P1.1</span>
+                <h2 class="text-xl font-bold text-slate-800">Kerapatan Balok Kayu</h2>
+              </div>
+              <p class="text-xs text-slate-500 mt-1">Menggunakan Mikrometer Sekrup & Neraca Ohaus ($\rho_{\text{lit}} = 900\text{ kg/m}^3$).</p>
+            </div>
+            <button onclick="loadSampleP1Balok()" class="px-3.5 py-2 bg-amber-50 text-amber-700 hover:bg-amber-100 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition"><i class="fa-solid fa-magic"></i> Contoh Data</button>
+          </div>
+
+          <!-- Formula -->
+          <div class="mt-4 p-4 bg-slate-50 rounded-xl border border-slate-200 text-xs">
+            <div class="font-bold text-slate-700 mb-1"><i class="fa-solid fa-square-root-variable text-amber-600 mr-1"></i> Rumus:</div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+              <div class="p-2 bg-white rounded border border-slate-200">$$\rho = \frac{m}{p \times l \times t}$$</div>
+              <div class="p-2 bg-white rounded border border-slate-200">
+                $$\Delta \rho = \left|\frac{1}{plt}\right|\Delta m + \left|\frac{m}{p^2lt}\right|\Delta p + \left|\frac{m}{pl^2t}\right|\Delta l + \left|\frac{m}{plt^2}\right|\Delta t$$
+              </div>
+            </div>
+          </div>
+
+          <!-- Inputs with Unit Selectors -->
+          <div class="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
+            <div>
+              <label class="block font-semibold text-slate-700 mb-1">Panjang ($p$)</label>
+              <div class="flex items-center gap-1">
+                <input type="number" id="p1b-p" step="0.01" value="50.2" oninput="calculateP1Balok()" class="w-full px-3 py-2 border border-slate-300 rounded-lg font-semibold text-sm" />
+                <select id="p1b-p-unit" onchange="calculateP1Balok()" class="px-2 py-2 bg-white border border-slate-300 rounded-lg font-semibold">
+                  <option value="0.001" selected>mm</option>
+                  <option value="0.01">cm</option>
+                  <option value="1">m</option>
+                </select>
+              </div>
+              <p class="text-[10px] text-slate-400 mt-1">$\Delta p = 0.005\text{ mm}$ (Mikrometer)</p>
+            </div>
+
+            <div>
+              <label class="block font-semibold text-slate-700 mb-1">Lebar ($l$)</label>
+              <div class="flex items-center gap-1">
+                <input type="number" id="p1b-l" step="0.01" value="24.5" oninput="calculateP1Balok()" class="w-full px-3 py-2 border border-slate-300 rounded-lg font-semibold text-sm" />
+                <select id="p1b-l-unit" onchange="calculateP1Balok()" class="px-2 py-2 bg-white border border-slate-300 rounded-lg font-semibold">
+                  <option value="0.001" selected>mm</option>
+                  <option value="0.01">cm</option>
+                  <option value="1">m</option>
+                </select>
+              </div>
+              <p class="text-[10px] text-slate-400 mt-1">$\Delta l = 0.005\text{ mm}$ (Mikrometer)</p>
+            </div>
+
+            <div>
+              <label class="block font-semibold text-slate-700 mb-1">Tinggi ($t$)</label>
+              <div class="flex items-center gap-1">
+                <input type="number" id="p1b-t" step="0.01" value="15.0" oninput="calculateP1Balok()" class="w-full px-3 py-2 border border-slate-300 rounded-lg font-semibold text-sm" />
+                <select id="p1b-t-unit" onchange="calculateP1Balok()" class="px-2 py-2 bg-white border border-slate-300 rounded-lg font-semibold">
+                  <option value="0.001" selected>mm</option>
+                  <option value="0.01">cm</option>
+                  <option value="1">m</option>
+                </select>
+              </div>
+              <p class="text-[10px] text-slate-400 mt-1">$\Delta t = 0.005\text{ mm}$ (Mikrometer)</p>
+            </div>
+
+            <div>
+              <label class="block font-semibold text-slate-700 mb-1">Massa ($m$)</label>
+              <div class="flex items-center gap-1">
+                <input type="number" id="p1b-m" step="0.01" value="16.5" oninput="calculateP1Balok()" class="w-full px-3 py-2 border border-slate-300 rounded-lg font-semibold text-sm" />
+                <select id="p1b-m-unit" onchange="calculateP1Balok()" class="px-2 py-2 bg-white border border-slate-300 rounded-lg font-semibold">
+                  <option value="0.001" selected>gram (g)</option>
+                  <option value="1">kg</option>
+                </select>
+              </div>
+              <p class="text-[10px] text-slate-400 mt-1">$\Delta m = 0.05\text{ g}$ (Neraca Ohaus)</p>
+            </div>
+          </div>
+
+          <!-- Output Satuan Pilihan -->
+          <div class="mt-4 flex items-center gap-3 text-xs">
+            <span class="font-semibold text-slate-600">Tampilkan Satuan Kerapatan:</span>
+            <select id="p1b-out-unit" onchange="calculateP1Balok()" class="px-3 py-1.5 bg-amber-50 border border-amber-200 rounded-lg font-bold text-amber-900">
+              <option value="1" selected>kg/m³ (SI Baku)</option>
+              <option value="0.001">g/cm³</option>
+            </select>
+          </div>
+
+          <!-- Result Cards -->
+          <div class="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div class="p-4 bg-amber-50 rounded-xl border border-amber-100">
+              <span class="text-xs font-semibold text-amber-700 uppercase">Kerapatan Balok ($\rho$)</span>
+              <div id="p1b-res-rho" class="text-2xl font-bold text-amber-950 mt-1">-</div>
+            </div>
+            <div class="p-4 bg-amber-50 rounded-xl border border-amber-100">
+              <span class="text-xs font-semibold text-amber-700 uppercase">Ketidakpastian ($\Delta\rho$)</span>
+              <div id="p1b-res-drho" class="text-2xl font-bold text-amber-950 mt-1">-</div>
+            </div>
+            <div class="p-4 bg-amber-50 rounded-xl border border-amber-100">
+              <span class="text-xs font-semibold text-amber-700 uppercase">% Kesalahan (%Error)</span>
+              <div id="p1b-res-err" class="text-2xl font-bold text-amber-950 mt-1">-</div>
+              <p class="text-[10px] text-amber-700 mt-0.5">Literatur: $900\text{ kg/m}^3$</p>
+            </div>
+          </div>
+
+          <!-- Copy Report -->
+          <div class="mt-6 p-4 bg-slate-900 rounded-xl text-slate-100">
+            <div class="flex justify-between items-center mb-2">
+              <span class="text-xs font-mono text-cyan-400 font-semibold"><i class="fa-solid fa-clipboard mr-1"></i> FORMAT LAPORAN (P1.1 BALOK):</span>
+              <button onclick="copyToClipboard('p1b-report-text')" class="text-xs bg-slate-800 hover:bg-slate-700 px-3 py-1 rounded-md text-slate-200">Salin</button>
+            </div>
+            <pre id="p1b-report-text" class="font-mono text-xs whitespace-pre-wrap leading-relaxed"></pre>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== MODUL P1.2: SILINDER LOGAM ==================== -->
+      <section id="section-p1_silinder" class="tab-content hidden space-y-6">
+        <div class="bg-white p-5 sm:p-6 rounded-2xl shadow-sm border border-slate-200">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 gap-3">
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="px-2.5 py-1 bg-teal-100 text-teal-700 rounded-md text-xs font-extrabold uppercase">Modul P1.2</span>
+                <h2 class="text-xl font-bold text-slate-800">Kerapatan Silinder Logam</h2>
+              </div>
+              <p class="text-xs text-slate-500 mt-1">Menggunakan Jangka Sorong & Neraca Ohaus ($\rho_{\text{lit}} = 7900\text{ kg/m}^3$).</p>
+            </div>
+            <button onclick="loadSampleP1Silinder()" class="px-3.5 py-2 bg-teal-50 text-teal-700 hover:bg-teal-100 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition"><i class="fa-solid fa-magic"></i> Contoh Data</button>
+          </div>
+
+          <!-- Formula -->
+          <div class="mt-4 p-4 bg-slate-50 rounded-xl border border-slate-200 text-xs">
+            <div class="font-bold text-slate-700 mb-1"><i class="fa-solid fa-square-root-variable text-teal-600 mr-1"></i> Rumus:</div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+              <div class="p-2 bg-white rounded border border-slate-200">$$\rho = \frac{4m}{\pi d^2 t}$$</div>
+              <div class="p-2 bg-white rounded border border-slate-200">$$\Delta \rho = \left|\frac{4}{\pi d^2 t}\right|\Delta m + \left|\frac{8m}{\pi d^3 t}\right|\Delta d + \left|\frac{4m}{\pi d^2 t^2}\right|\Delta t$$</div>
+            </div>
+          </div>
+
+          <!-- Inputs with Unit Selectors -->
+          <div class="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
+            <div>
+              <label class="block font-semibold text-slate-700 mb-1">Diameter ($d$)</label>
+              <div class="flex items-center gap-1">
+                <input type="number" id="p1s-d" step="0.01" value="18.5" oninput="calculateP1Silinder()" class="w-full px-3 py-2 border border-slate-300 rounded-lg font-semibold text-sm" />
+                <select id="p1s-d-unit" onchange="calculateP1Silinder()" class="px-2 py-2 bg-white border border-slate-300 rounded-lg font-semibold">
+                  <option value="0.001" selected>mm</option>
+                  <option value="0.01">cm</option>
+                  <option value="1">m</option>
+                </select>
+              </div>
+              <p class="text-[10px] text-slate-400 mt-1">$\Delta d = 0.025\text{ mm}$ (Jangka Sorong)</p>
+            </div>
+
+            <div>
+              <label class="block font-semibold text-slate-700 mb-1">Tinggi ($t$)</label>
+              <div class="flex items-center gap-1">
+                <input type="number" id="p1s-t" step="0.01" value="45.0" oninput="calculateP1Silinder()" class="w-full px-3 py-2 border border-slate-300 rounded-lg font-semibold text-sm" />
+                <select id="p1s-t-unit" onchange="calculateP1Silinder()" class="px-2 py-2 bg-white border border-slate-300 rounded-lg font-semibold">
+                  <option value="0.001" selected>mm</option>
+                  <option value="0.01">cm</option>
+                  <option value="1">m</option>
+                </select>
+              </div>
+              <p class="text-[10px] text-slate-400 mt-1">$\Delta t = 0.025\text{ mm}$ (Jangka Sorong)</p>
+            </div>
+
+            <div>
+              <label class="block font-semibold text-slate-700 mb-1">Massa ($m$)</label>
+              <div class="flex items-center gap-1">
+                <input type="number" id="p1s-m" step="0.01" value="96.0" oninput="calculateP1Silinder()" class="w-full px-3 py-2 border border-slate-300 rounded-lg font-semibold text-sm" />
+                <select id="p1s-m-unit" onchange="calculateP1Silinder()" class="px-2 py-2 bg-white border border-slate-300 rounded-lg font-semibold">
+                  <option value="0.001" selected>gram (g)</option>
+                  <option value="1">kg</option>
+                </select>
+              </div>
+              <p class="text-[10px] text-slate-400 mt-1">$\Delta m = 0.05\text{ g}$ (Neraca Ohaus)</p>
+            </div>
+          </div>
+
+          <!-- Output Unit Selection -->
+          <div class="mt-4 flex items-center gap-3 text-xs">
+            <span class="font-semibold text-slate-600">Tampilkan Satuan Kerapatan:</span>
+            <select id="p1s-out-unit" onchange="calculateP1Silinder()" class="px-3 py-1.5 bg-teal-50 border border-teal-200 rounded-lg font-bold text-teal-900">
+              <option value="1" selected>kg/m³ (SI Baku)</option>
+              <option value="0.001">g/cm³</option>
+            </select>
+          </div>
+
+          <!-- Result Cards -->
+          <div class="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div class="p-4 bg-teal-50 rounded-xl border border-teal-100">
+              <span class="text-xs font-semibold text-teal-700 uppercase">Kerapatan Silinder ($\rho$)</span>
+              <div id="p1s-res-rho" class="text-2xl font-bold text-teal-950 mt-1">-</div>
+            </div>
+            <div class="p-4 bg-teal-50 rounded-xl border border-teal-100">
+              <span class="text-xs font-semibold text-teal-700 uppercase">Ketidakpastian ($\Delta\rho$)</span>
+              <div id="p1s-res-drho" class="text-2xl font-bold text-teal-950 mt-1">-</div>
+            </div>
+            <div class="p-4 bg-teal-50 rounded-xl border border-teal-100">
+              <span class="text-xs font-semibold text-teal-700 uppercase">% Kesalahan (%Error)</span>
+              <div id="p1s-res-err" class="text-2xl font-bold text-teal-950 mt-1">-</div>
+              <p class="text-[10px] text-teal-700 mt-0.5">Literatur: $7900\text{ kg/m}^3$</p>
+            </div>
+          </div>
+
+          <div class="mt-6 p-4 bg-slate-900 rounded-xl text-slate-100">
+            <div class="flex justify-between items-center mb-2">
+              <span class="text-xs font-mono text-cyan-400 font-semibold"><i class="fa-solid fa-clipboard mr-1"></i> FORMAT LAPORAN (P1.2 SILINDER):</span>
+              <button onclick="copyToClipboard('p1s-report-text')" class="text-xs bg-slate-800 hover:bg-slate-700 px-3 py-1 rounded-md text-slate-200">Salin</button>
+            </div>
+            <pre id="p1s-report-text" class="font-mono text-xs whitespace-pre-wrap leading-relaxed"></pre>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== MODUL P1.3: PASIR ==================== -->
+      <section id="section-p1_pasir" class="tab-content hidden space-y-6">
+        <div class="bg-white p-5 sm:p-6 rounded-2xl shadow-sm border border-slate-200">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 gap-3">
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="px-2.5 py-1 bg-orange-100 text-orange-700 rounded-md text-xs font-extrabold uppercase">Modul P1.3</span>
+                <h2 class="text-xl font-bold text-slate-800">Kerapatan Pasir (Metode Piknometer)</h2>
+              </div>
+              <p class="text-xs text-slate-500 mt-1">Menggunakan Piknometer & Neraca Ohaus ($\rho_{\text{lit}} = 1850\text{ kg/m}^3$, $\rho_{\text{air}} = 1000\text{ kg/m}^3$).</p>
+            </div>
+            <button onclick="loadSampleP1Pasir()" class="px-3.5 py-2 bg-orange-50 text-orange-700 hover:bg-orange-100 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition">
+              <i class="fa-solid fa-magic"></i> Contoh Data
+            </button>
+          </div>
+
+          <!-- Formula -->
+          <div class="mt-4 p-4 bg-slate-50 rounded-xl border border-slate-200 text-xs">
+            <div class="font-bold text-slate-700 mb-1"><i class="fa-solid fa-square-root-variable text-orange-600 mr-1"></i> Rumus & Penyebut $D = (m_2 - m_1) - (m_4 - m_3)$:</div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+              <div class="p-2 bg-white rounded border border-slate-200">$$\rho = \frac{m_3 - m_1}{(m_2 - m_1) - (m_4 - m_3)} \times \rho_{\text{air}}$$</div>
+              <div class="p-2 bg-white rounded border border-slate-200">$$\Delta\rho = \frac{\rho_{\text{air}}}{D^2} \left[ |m_4-m_2|\Delta m_1 + |m_1-m_3|\Delta m_2 + |m_2-m_4|\Delta m_3 + |m_3-m_1|\Delta m_4 \right]$$</div>
+            </div>
+          </div>
+
+          <!-- Inputs -->
+          <div class="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
+            <div>
+              <label class="block font-semibold text-slate-700 mb-1">$m_1$: Pikno Kosong</label>
+              <div class="flex items-center gap-1">
+                <input type="number" id="p1p-m1" step="0.01" value="32.1" oninput="calculateP1Pasir()" class="w-full px-3 py-2 border border-slate-300 rounded-lg font-semibold text-sm" />
+                <select id="p1p-m1-unit" onchange="calculateP1Pasir()" class="px-2 py-2 bg-white border border-slate-300 rounded-lg font-semibold">
+                  <option value="0.001" selected>gram</option>
+                  <option value="1">kg</option>
+                </select>
+              </div>
+            </div>
+            <div>
+              <label class="block font-semibold text-slate-700 mb-1">$m_2$: Pikno + Air</label>
+              <div class="flex items-center gap-1">
+                <input type="number" id="p1p-m2" step="0.01" value="82.5" oninput="calculateP1Pasir()" class="w-full px-3 py-2 border border-slate-300 rounded-lg font-semibold text-sm" />
+                <select id="p1p-m2-unit" onchange="calculateP1Pasir()" class="px-2 py-2 bg-white border border-slate-300 rounded-lg font-semibold">
+                  <option value="0.001" selected>gram</option>
+                  <option value="1">kg</option>
+                </select>
+              </div>
+            </div>
+            <div>
+              <label class="block font-semibold text-slate-700 mb-1">$m_3$: Pikno + Pasir</label>
+              <div class="flex items-center gap-1">
+                <input type="number" id="p1p-m3" step="0.01" value="58.3" oninput="calculateP1Pasir()" class="w-full px-3 py-2 border border-slate-300 rounded-lg font-semibold text-sm" />
+                <select id="p1p-m3-unit" onchange="calculateP1Pasir()" class="px-2 py-2 bg-white border border-slate-300 rounded-lg font-semibold">
+                  <option value="0.001" selected>gram</option>
+                  <option value="1">kg</option>
+                </select>
+              </div>
+            </div>
+            <div>
+              <label class="block font-semibold text-slate-700 mb-1">$m_4$: Pikno + Pasir + Air</label>
+              <div class="flex items-center gap-1">
+                <input type="number" id="p1p-m4" step="0.01" value="98.8" oninput="calculateP1Pasir()" class="w-full px-3 py-2 border border-slate-300 rounded-lg font-semibold text-sm" />
+                <select id="p1p-m4-unit" onchange="calculateP1Pasir()" class="px-2 py-2 bg-white border border-slate-300 rounded-lg font-semibold">
+                  <option value="0.001" selected>gram</option>
+                  <option value="1">kg</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <p class="text-[11px] text-slate-400 mt-2">Ketelitian Neraca Ohaus: $\Delta m_1 = \Delta m_2 = \Delta m_3 = \Delta m_4 = 0.05\text{ g}$.</p>
+
+          <!-- Result Cards -->
+          <div class="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div class="p-4 bg-orange-50 rounded-xl border border-orange-100">
+              <span class="text-xs font-semibold text-orange-700 uppercase">Kerapatan Pasir ($\rho$)</span>
+              <div id="p1p-res-rho" class="text-2xl font-bold text-orange-950 mt-1">-</div>
+            </div>
+            <div class="p-4 bg-orange-50 rounded-xl border border-orange-100">
+              <span class="text-xs font-semibold text-orange-700 uppercase">Ketidakpastian ($\Delta\rho$)</span>
+              <div id="p1p-res-drho" class="text-2xl font-bold text-orange-950 mt-1">-</div>
+            </div>
+            <div class="p-4 bg-orange-50 rounded-xl border border-orange-100">
+              <span class="text-xs font-semibold text-orange-700 uppercase">% Kesalahan (%Error)</span>
+              <div id="p1p-res-err" class="text-2xl font-bold text-orange-950 mt-1">-</div>
+              <p class="text-[10px] text-orange-700 mt-0.5">Literatur: $1850\text{ kg/m}^3$</p>
+            </div>
+          </div>
+
+          <div class="mt-6 p-4 bg-slate-900 rounded-xl text-slate-100">
+            <div class="flex justify-between items-center mb-2">
+              <span class="text-xs font-mono text-cyan-400 font-semibold"><i class="fa-solid fa-clipboard mr-1"></i> FORMAT LAPORAN (P1.3 PASIR):</span>
+              <button onclick="copyToClipboard('p1p-report-text')" class="text-xs bg-slate-800 hover:bg-slate-700 px-3 py-1 rounded-md text-slate-200">Salin</button>
+            </div>
+            <pre id="p1p-report-text" class="font-mono text-xs whitespace-pre-wrap leading-relaxed"></pre>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== MODUL P1.4: SPIRTUS (MOHR) ==================== -->
+      <section id="section-p1_spirtus" class="tab-content hidden space-y-6">
+        <div class="bg-white p-5 sm:p-6 rounded-2xl shadow-sm border border-slate-200">
+          <div class="flex flex-col lg:flex-row lg:items-center justify-between pb-4 border-b border-slate-100 gap-4">
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="px-2.5 py-1 bg-pink-100 text-pink-700 rounded-md text-xs font-extrabold uppercase">Modul P1.4</span>
+                <h2 class="text-xl font-bold text-slate-800">Kerapatan Spirtus (Neraca Mohr-Westphal)</h2>
+              </div>
+              <p class="text-xs text-slate-500 mt-1">Menggunakan Beban Penunggang & Gelas Ukur ($\rho_{\text{lit}} = 820\text{ kg/m}^3$). Beban dapat ditambah/dikurangi.</p>
+            </div>
+            <div class="flex flex-wrap items-center gap-2">
+              <button onclick="addP1SpirtusRider()" class="px-3 py-1.5 bg-pink-600 hover:bg-pink-700 text-white rounded-lg text-xs font-semibold flex items-center gap-1.5 transition shadow-sm">
+                <i class="fa-solid fa-plus"></i> Tambah Beban Penunggang
+              </button>
+              <button onclick="loadSampleP1Spirtus()" class="px-3 py-1.5 bg-pink-50 text-pink-700 hover:bg-pink-100 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition">
+                <i class="fa-solid fa-magic"></i> Contoh Data
+              </button>
+            </div>
+          </div>
+          <div class="mt-4 p-4 bg-pink-50/50 rounded-xl border border-pink-100 flex flex-wrap items-center gap-6 text-xs">
+            <div>
+              <label class="block font-semibold text-slate-700 mb-1">Perubahan Volume ($V$)</label>
+              <div class="flex items-center gap-1.5">
+                <input type="number" id="p1sp-v" step="0.1" value="5.0" oninput="calculateP1Spirtus()" class="w-24 px-3 py-1.5 bg-white border border-slate-300 rounded-lg font-semibold text-xs" />
+                <span class="font-semibold text-slate-600">ml / cm³</span>
+              </div>
+              <p class="text-[10px] text-slate-500 mt-1">Ketelitian Gelas Ukur: $\Delta V = 0{,}125\text{ ml}$</p>
+            </div>
+            <div>
+              <label class="block font-semibold text-slate-700 mb-1">Tampilkan Satuan Hasil:</label>
+              <select id="p1sp-out-unit" onchange="calculateP1Spirtus()" class="px-3 py-1.5 bg-white border border-slate-300 rounded-lg font-bold text-pink-700 text-xs shadow-sm">
+                <option value="cgs" selected>gr/cm³ (CGS)</option>
+                <option value="si">kg/m³ (SI)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Formula -->
+          <div class="mt-4 p-4 bg-slate-50 rounded-xl border border-slate-200 text-xs">
+            <div class="font-bold text-slate-700 mb-1"><i class="fa-solid fa-square-root-variable text-pink-600 mr-1"></i> Rumus:</div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+              <div class="p-2 bg-white rounded border border-slate-200">$$\rho = \frac{\sum (m_i \times l_i)}{10 V}$$</div>
+              <div class="p-2 bg-white rounded border border-slate-200">
+                $$\Delta\rho = \sum \left( \left|\frac{l_i}{10V}\right|\Delta m_i + \left|\frac{m_i}{10V}\right|\Delta l_i \right) + \left|\frac{\sum m_i l_i}{10 V^2}\right|\Delta V$$
+              </div>
+            </div>
+          </div>
+
+          <!-- Dynamic Riders Container -->
+          <div class="mt-4">
+            <div class="text-xs font-bold text-slate-700 mb-2">Daftar Beban Penunggang ($m_i, l_i$):</div>
+            <div id="p1sp-riders-container" class="space-y-2">
+              <!-- Dynamically Populated Riders -->
+            </div>
+          </div>
+
+          <!-- Result Cards -->
+          <div class="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div class="p-4 bg-pink-50 rounded-xl border border-pink-100">
+              <span class="text-xs font-semibold text-pink-700 uppercase">Kerapatan Spirtus ($\rho$)</span>
+              <div id="p1sp-res-rho" class="text-2xl font-bold text-pink-950 mt-1">-</div>
+            </div>
+            <div class="p-4 bg-pink-50 rounded-xl border border-pink-100">
+              <span class="text-xs font-semibold text-pink-700 uppercase">Ketidakpastian ($\Delta\rho$)</span>
+              <div id="p1sp-res-drho" class="text-2xl font-bold text-pink-950 mt-1">-</div>
+            </div>
+            <div class="p-4 bg-pink-50 rounded-xl border border-pink-100">
+              <span class="text-xs font-semibold text-pink-700 uppercase">% Kesalahan (%Error)</span>
+              <div id="p1sp-res-err" class="text-2xl font-bold text-pink-950 mt-1">-</div>
+              <p class="text-[10px] text-pink-700 mt-0.5">Literatur: $820\text{ kg/m}^3$</p>
+            </div>
+          </div>
+
+          <div class="mt-6 p-4 bg-slate-900 rounded-xl text-slate-100">
+            <div class="flex justify-between items-center mb-2">
+              <span class="text-xs font-mono text-cyan-400 font-semibold"><i class="fa-solid fa-clipboard mr-1"></i> FORMAT LAPORAN (P1.4 SPIRTUS):</span>
+              <button onclick="copyToClipboard('p1sp-report-text')" class="text-xs bg-slate-800 hover:bg-slate-700 px-3 py-1 rounded-md text-slate-200">Salin</button>
+            </div>
+            <pre id="p1sp-report-text" class="font-mono text-xs whitespace-pre-wrap leading-relaxed"></pre>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- ==================== FOOTER ==================== -->
+    <footer class="bg-white border-t border-slate-200 mt-12 py-6 text-center text-xs text-slate-500">
+      <div class="max-w-7xl mx-auto px-4">
+        <p class="font-semibold text-slate-700">Praktikum Fisika Dasar (PFD) Ruang C — Analisis Data Terpadu</p>
+        <p class="mt-1">Dibuat sesuai format laporan resmi, dilengkapi perambatan ketidakpastian turunan parsial dan regresi linear.</p>
+      </div>
+    </footer>
+
+    <!-- ==================== JAVASCRIPT ENGINE ==================== -->
+    <script>
+      // --- TAB SWITCHER ---
+      function switchTab(tabId) {
+        document.querySelectorAll(".tab-content").forEach((el) => el.classList.add("hidden"));
+        document.querySelectorAll(".nav-btn").forEach((el) => {
+          el.classList.remove("bg-blue-600", "text-white", "shadow");
+          el.classList.add("text-slate-300", "hover:bg-slate-800");
+        });
+
+        document.getElementById("section-" + tabId).classList.remove("hidden");
+        const activeBtn = document.getElementById("tab-" + tabId);
+        activeBtn.classList.add("bg-blue-600", "text-white", "shadow");
+        activeBtn.classList.remove("text-slate-300", "hover:bg-slate-800");
+
+        if (tabId === "m2") {
+          setTimeout(initM2Chart, 100);
+        }
+        renderLatex();
+      }
+
+      // --- COPY TO CLIPBOARD ---
+      function copyToClipboard(elementId) {
+        const text = document.getElementById(elementId).innerText;
+        navigator.clipboard.writeText(text).then(() => {
+          alert("Teks format laporan berhasil disalin ke clipboard!");
+        });
+      }
+
+      function renderLatex() {
+        if (window.renderMathInElement) {
+          renderMathInElement(document.body, {
+            delimiters: [
+              { left: "$$", right: "$$", display: true },
+              { left: "$", right: "$", display: false },
+            ],
+            throwOnError: false,
+          });
+        }
+      }
+
+      // ==========================================
+      // ================ MODUL M3 ================
+      // ==========================================
+      let m3Data = [];
+
+      function addM3Row(tp = "", tp_acc = "", tq = "", tq_acc = "") {
+        const id = Date.now() + Math.random();
+        m3Data.push({ id, tp, tp_acc, tq, tq_acc });
+        renderM3Table();
+        calculateM3();
+      }
+
+      function removeM3Row(id) {
+        m3Data = m3Data.filter((row) => row.id !== id);
+        renderM3Table();
+        calculateM3();
+      }
+
+      function removeM3LastRow() {
+        if (m3Data.length > 2) {
+          m3Data.pop();
+          renderM3Table();
+          calculateM3();
+        }
+      }
+
+      function renderM3Table() {
+        const tbody = document.getElementById("m3-tbody");
+        tbody.innerHTML = "";
+        document.getElementById("m3-data-count").innerText = `${m3Data.length} Baris`;
+
+        m3Data.forEach((row, index) => {
+          tbody.innerHTML += `
+          <tr class="hover:bg-slate-50 transition">
+            <td class="p-2 border border-slate-200 font-bold text-slate-500">${index + 1}</td>
+            <td class="p-1.5 border border-slate-200">
+              <input type="number" step="any" value="${row.tp}" oninput="updateM3Val(${index}, 'tp', this.value)" class="w-full text-center px-1.5 py-1 border border-slate-200 rounded text-xs focus:ring-1 focus:ring-blue-500" placeholder="tp" />
+            </td>
+            <td class="p-1.5 border border-slate-200">
+              <input type="number" step="any" value="${row.tp_acc}" oninput="updateM3Val(${index}, 'tp_acc', this.value)" class="w-full text-center px-1.5 py-1 border border-slate-200 rounded text-xs focus:ring-1 focus:ring-blue-500" placeholder="tp'" />
+            </td>
+            <td class="p-1.5 border border-slate-200">
+              <input type="number" step="any" value="${row.tq}" oninput="updateM3Val(${index}, 'tq', this.value)" class="w-full text-center px-1.5 py-1 border border-slate-200 rounded text-xs focus:ring-1 focus:ring-blue-500" placeholder="tq" />
+            </td>
+            <td class="p-1.5 border border-slate-200">
+              <input type="number" step="any" value="${row.tq_acc}" oninput="updateM3Val(${index}, 'tq_acc', this.value)" class="w-full text-center px-1.5 py-1 border border-slate-200 rounded text-xs focus:ring-1 focus:ring-blue-500" placeholder="tq'" />
+            </td>
+            <td id="m3-vp-${index}" class="p-2 border border-slate-200 font-mono text-slate-600">-</td>
+            <td id="m3-vp_acc-${index}" class="p-2 border border-slate-200 font-mono text-slate-600">-</td>
+            <td id="m3-vq-${index}" class="p-2 border border-slate-200 font-mono text-slate-600">-</td>
+            <td id="m3-vq_acc-${index}" class="p-2 border border-slate-200 font-mono text-slate-600">-</td>
+            <td id="m3-e-${index}" class="p-2 border border-slate-200 font-bold text-emerald-700 font-mono">-</td>
+            <td id="m3-e2-${index}" class="p-2 border border-slate-200 font-mono text-slate-500">-</td>
+            <td class="p-1.5 border border-slate-200">
+              <button onclick="removeM3Row(${row.id})" class="text-rose-500 hover:text-rose-700 p-1"><i class="fa-solid fa-trash-can"></i></button>
+            </td>
+          </tr>
+        `;
+        });
+      }
+
+      function updateM3Val(index, field, val) {
+        m3Data[index][field] = val;
+        calculateM3();
+      }
+
+      function calculateM3() {
+        const xVal = parseFloat(document.getElementById("m3-x-val").value) || 0;
+        const xUnit = parseFloat(document.getElementById("m3-x-unit").value) || 1;
+        const tUnit = parseFloat(document.getElementById("m3-t-unit").value) || 1;
+        const x = xVal * xUnit; // in meters
+
+        let eList = [];
+        let sumE = 0;
+        let sumE2 = 0;
+
+        m3Data.forEach((row, index) => {
+          const tp = parseFloat(row.tp) * tUnit;
+          const tp_acc = parseFloat(row.tp_acc) * tUnit;
+          const tq = parseFloat(row.tq) * tUnit;
+          const tq_acc = parseFloat(row.tq_acc) * tUnit;
+
+          const elVp = document.getElementById(`m3-vp-${index}`);
+          const elVpAcc = document.getElementById(`m3-vp_acc-${index}`);
+          const elVq = document.getElementById(`m3-vq-${index}`);
+          const elVqAcc = document.getElementById(`m3-vq_acc-${index}`);
+          const elE = document.getElementById(`m3-e-${index}`);
+          const elE2 = document.getElementById(`m3-e2-${index}`);
+
+          if (tp > 0 && tp_acc > 0 && tq > 0 && tq_acc > 0 && x > 0) {
+            const vp = x / tp;
+            const vp_acc = x / tp_acc;
+            const vq = x / tq;
+            const vq_acc = x / tq_acc;
+
+            const denom = vp - vq;
+            let e = denom !== 0 ? Math.abs((vp_acc - vq_acc) / denom) : 0;
+            const e2 = e * e;
+
+            if (elVp) elVp.innerText = vp.toFixed(3);
+            if (elVpAcc) elVpAcc.innerText = vp_acc.toFixed(3);
+            if (elVq) elVq.innerText = vq.toFixed(3);
+            if (elVqAcc) elVqAcc.innerText = vq_acc.toFixed(3);
+            if (elE) elE.innerText = e.toFixed(4);
+            if (elE2) elE2.innerText = e2.toFixed(4);
+
+            eList.push(e);
+            sumE += e;
+            sumE2 += e2;
+          } else {
+            if (elVp) elVp.innerText = "-";
+            if (elVpAcc) elVpAcc.innerText = "-";
+            if (elVq) elVq.innerText = "-";
+            if (elVqAcc) elVqAcc.innerText = "-";
+            if (elE) elE.innerText = "-";
+            if (elE2) elE2.innerText = "-";
+          }
+        });
+
+        const n = eList.length;
+        if (n > 1) {
+          const eBar = sumE / n;
+          const deltaE = Math.sqrt(Math.max(0, (sumE2 - n * (eBar * eBar)) / (n - 1)));
+          const pkr = eBar !== 0 ? (deltaE / eBar) * 100 : 0;
+
+          document.getElementById("m3-sum-e").innerText = sumE.toFixed(4);
+          document.getElementById("m3-sum-e2").innerText = sumE2.toFixed(4);
+          document.getElementById("m3-res-ebar").innerText = eBar.toFixed(4);
+          document.getElementById("m3-res-deltae").innerText = "± " + deltaE.toFixed(4);
+          document.getElementById("m3-res-pkr").innerText = pkr.toFixed(2) + " %";
+
+          document.getElementById("m3-report-text").innerText = `=== ANALISIS DATA: M3 ENERGI DAN MOMENTUM ===
+Jumlah Data Aktif (n)  = ${n}
+Panjang Objek (x)      = ${x} m
+Sigma e (Σe)           = ${sumE.toFixed(4)}
+Sigma e^2 (Σe^2)       = ${sumE2.toFixed(4)}
+Koefisien e Rata-rata  = ${eBar.toFixed(4)}
+Ketidakpastian (Δe)    = ${deltaE.toFixed(4)}
+%Ketidakpastian Relatif = ${pkr.toFixed(2)} %
+
+Format Pelaporan Akhir:
+e = (e_bar ± Δe)
+e = (${eBar.toFixed(4)} ± ${deltaE.toFixed(4)})`;
+        } else {
+          document.getElementById("m3-sum-e").innerText = "-";
+          document.getElementById("m3-sum-e2").innerText = "-";
+          document.getElementById("m3-res-ebar").innerText = "-";
+          document.getElementById("m3-res-deltae").innerText = "-";
+          document.getElementById("m3-res-pkr").innerText = "-";
+          document.getElementById("m3-report-text").innerText = "Harap isi minimal 2 baris data lengkap untuk analisis statistik.";
+        }
+      }
+
+      function loadSampleM3() {
+        m3Data = [];
+        const tpArr = [0.24, 0.23, 0.25, 0.24, 0.23, 0.24, 0.25, 0.23, 0.24, 0.24];
+        const tpAcc = [0.45, 0.44, 0.46, 0.45, 0.43, 0.45, 0.46, 0.44, 0.45, 0.44];
+        const tqArr = [0.35, 0.36, 0.34, 0.35, 0.36, 0.34, 0.35, 0.36, 0.35, 0.34];
+        const tqAcc = [0.28, 0.27, 0.29, 0.28, 0.27, 0.28, 0.29, 0.27, 0.28, 0.28];
+
+        for (let i = 0; i < 10; i++) {
+          m3Data.push({
+            id: i + 1,
+            tp: tpArr[i],
+            tp_acc: tpAcc[i],
+            tq: tqArr[i],
+            tq_acc: tqAcc[i],
+          });
+        }
+        renderM3Table();
+        calculateM3();
+      }
+
+      function resetM3() {
+        m3Data = [];
+        for (let i = 0; i < 5; i++) addM3Row();
+      }
+
+      // ==========================================
+      // ================ MODUL M2 ================
+      // ==========================================
+      let m2Data = [];
+      let m2ChartInstance = null;
+
+      function addM2Row(h = "", tf = "") {
+        const id = Date.now() + Math.random();
+        m2Data.push({ id, h, tf });
+        renderM2Table();
+        calculateM2();
+      }
+
+      function removeM2Row(id) {
+        m2Data = m2Data.filter((row) => row.id !== id);
+        renderM2Table();
+        calculateM2();
+      }
+
+      function removeM2LastRow() {
+        if (m2Data.length > 3) {
+          m2Data.pop();
+          renderM2Table();
+          calculateM2();
+        }
+      }
+
+      function renderM2Table() {
+        const tbody = document.getElementById("m2-tbody");
+        tbody.innerHTML = "";
+        m2Data.forEach((row, index) => {
+          tbody.innerHTML += `
+          <tr class="hover:bg-slate-50 transition">
+            <td class="p-2 border border-slate-200 font-bold text-slate-500">${index + 1}</td>
+            <td class="p-1.5 border border-slate-200">
+              <input type="number" step="any" value="${row.h}" oninput="updateM2Val(${index}, 'h', this.value)" class="w-full text-center px-1.5 py-1 border border-slate-200 rounded text-xs focus:ring-1 focus:ring-indigo-500" placeholder="h" />
+            </td>
+            <td class="p-1.5 border border-slate-200">
+              <input type="number" step="any" value="${row.tf}" oninput="updateM2Val(${index}, 'tf', this.value)" class="w-full text-center px-1.5 py-1 border border-slate-200 rounded text-xs focus:ring-1 focus:ring-indigo-500" placeholder="tf" />
+            </td>
+            <td id="m2-y-${index}" class="p-2 border border-slate-200 font-mono text-indigo-700 font-bold">-</td>
+            <td id="m2-x2-${index}" class="p-2 border border-slate-200 font-mono text-slate-500">-</td>
+            <td id="m2-y2-${index}" class="p-2 border border-slate-200 font-mono text-slate-500">-</td>
+            <td id="m2-xy-${index}" class="p-2 border border-slate-200 font-mono text-slate-500">-</td>
+            <td class="p-1.5 border border-slate-200">
+              <button onclick="removeM2Row(${row.id})" class="text-rose-500 hover:text-rose-700 p-1"><i class="fa-solid fa-trash-can"></i></button>
+            </td>
+          </tr>
+        `;
+        });
+      }
+
+      function updateM2Val(index, field, val) {
+        m2Data[index][field] = val;
+        calculateM2();
+      }
+
+      function calculateM2() {
+        const mVal = parseFloat(document.getElementById("m2-m-val").value) || 0;
+        const mUnit = parseFloat(document.getElementById("m2-m-unit").value) || 0.001;
+        const mKg = mVal * mUnit; // kg
+
+        const rVal = parseFloat(document.getElementById("m2-r-val").value) || 0;
+        const rUnit = parseFloat(document.getElementById("m2-r-unit").value) || 0.01;
+        const rM = rVal * rUnit; // meters
+
+        const hUnit = parseFloat(document.getElementById("m2-h-unit").value) || 1;
+        const tfUnit = parseFloat(document.getElementById("m2-tf-unit").value) || 1;
+
+        const g = 10;
+        const iLit = parseFloat(document.getElementById("m2-ilit").value) || 0.00883;
+
+        const deltaM = 0.00005; // 0.05 g in kg
+        const deltaR = 0.0005; // 0.5 mm in m
+
+        let xList = [],
+          yList = [];
+        let sumX = 0,
+          sumY = 0,
+          sumX2 = 0,
+          sumY2 = 0,
+          sumXY = 0;
+
+        m2Data.forEach((row, index) => {
+          const rawH = parseFloat(row.h);
+          const rawTf = parseFloat(row.tf);
+
+          const elY = document.getElementById(`m2-y-${index}`);
+          const elX2 = document.getElementById(`m2-x2-${index}`);
+          const elY2 = document.getElementById(`m2-y2-${index}`);
+          const elXY = document.getElementById(`m2-xy-${index}`);
+
+          if (!isNaN(rawH) && !isNaN(rawTf) && rawH > 0 && rawTf > 0) {
+            const x = rawH * hUnit;
+            const tfSec = rawTf * tfUnit;
+            const y = tfSec * tfSec; // tf^2
+            const x2 = x * x;
+            const y2 = y * y;
+            const xy = x * y;
+
+            if (elY) elY.innerText = y.toFixed(4);
+            if (elX2) elX2.innerText = x2.toFixed(4);
+            if (elY2) elY2.innerText = y2.toFixed(4);
+            if (elXY) elXY.innerText = xy.toFixed(4);
+
+            xList.push(x);
+            yList.push(y);
+            sumX += x;
+            sumY += y;
+            sumX2 += x2;
+            sumY2 += y2;
+            sumXY += xy;
+          } else {
+            if (elY) elY.innerText = "-";
+            if (elX2) elX2.innerText = "-";
+            if (elY2) elY2.innerText = "-";
+            if (elXY) elXY.innerText = "-";
+          }
+        });
+
+        const n = xList.length;
+        if (n >= 3) {
+          document.getElementById("m2-sum-x").innerText = sumX.toFixed(4);
+          document.getElementById("m2-sum-y").innerText = sumY.toFixed(4);
+          document.getElementById("m2-sum-x2").innerText = sumX2.toFixed(4);
+          document.getElementById("m2-sum-y2").innerText = sumY2.toFixed(4);
+          document.getElementById("m2-sum-xy").innerText = sumXY.toFixed(4);
+
+          const denom = n * sumX2 - sumX * sumX;
+          if (denom !== 0) {
+            const m = (n * sumXY - sumX * sumY) / denom;
+            const nIntercept = (sumX2 * sumY - sumX * sumXY) / denom;
+
+            const numSy = sumX2 * sumY * sumY - 2 * sumX * sumXY * sumY + n * sumXY * sumXY;
+            const Sy = Math.sqrt(Math.max(0, (1 / (n - 2)) * (sumY2 - numSy / denom)));
+            const Sm = Math.sqrt(Math.max(0, n / denom)) * Sy;
+            const Sn = Math.sqrt(Math.max(0, sumX2 / denom)) * Sy;
+
+            // Ip calculation: Ip = (m' * r^2 * (m * g - 2)) / 2
+            const Ip = (mKg * rM * rM * (m * g - 2)) / 2;
+
+            // Partial derivatives
+            const dIp_dM = 0.5 * g * rM * rM * mKg;
+            const dIp_dm = 0.5 * g * m * rM * rM - rM * rM;
+            const dIp_dr = g * m * rM * mKg - 2 * rM * mKg;
+
+            const deltaIp = Math.sqrt(Math.pow(dIp_dM * Sm, 2) + Math.pow(dIp_dm * deltaM, 2) + Math.pow(dIp_dr * deltaR, 2));
+
+            const errPercent = iLit !== 0 ? Math.abs((iLit - Ip) / iLit) * 100 : 0;
+
+            document.getElementById("m2-res-m").innerText = m.toFixed(4);
+            document.getElementById("m2-res-sm").innerText = `Sm = ± ${Sm.toFixed(4)}`;
+            document.getElementById("m2-res-n").innerText = nIntercept.toFixed(4);
+            document.getElementById("m2-res-sn").innerText = `Sn = ± ${Sn.toFixed(4)}`;
+            document.getElementById("m2-res-ip").innerText = Ip.toExponential(4) + " kg m²";
+            document.getElementById("m2-res-deltaip").innerText = `ΔIp = ± ${deltaIp.toExponential(4)} kg m²`;
+            document.getElementById("m2-res-error").innerText = errPercent.toFixed(2) + " %";
+            document.getElementById("m2-reg-eq").innerText = `Persamaan: y = (${m.toFixed(3)})x + (${nIntercept.toFixed(3)})`;
+
+            updateM2Chart(xList, yList, m, nIntercept);
+
+            document.getElementById("m2-report-text").innerText = `=== ANALISIS DATA: M2 GIROSKOP ===
+Data: Massa Beban (m') = ${mKg} kg, Jari-jari (r) = ${rM} m, g = ${g} m/s^2
+Gradien (m / Slope M) = ${m.toFixed(5)} ± ${Sm.toFixed(5)}
+Intercept (n)         = ${nIntercept.toFixed(5)} ± ${Sn.toFixed(5)}
+Persamaan Garis       : y = (${m.toFixed(4)})x + (${nIntercept.toFixed(4)})
+
+Momen Inersia Percobaan (Ip) = ${Ip.toExponential(4)} kg m^2
+Ketidakpastian (ΔIp)         = ${deltaIp.toExponential(4)} kg m^2
+Momen Inersia Literatur       = ${iLit.toExponential(4)} kg m^2
+Persentase Kesalahan (%Error) = ${errPercent.toFixed(2)} %
+
+Format Pelaporan Akhir:
+Ip = (Ip ± ΔIp) kg m^2
+Ip = (${Ip.toExponential(3)} ± ${deltaIp.toExponential(3)}) kg m^2`;
+          }
+        }
+      }
+
+      function initM2Chart() {
+        const canvas = document.getElementById("m2Chart");
+        if (!canvas) return;
+        const ctx = canvas.getContext("2d");
+        if (m2ChartInstance) m2ChartInstance.destroy();
+        m2ChartInstance = new Chart(ctx, {
+          type: "scatter",
+          data: {
+            datasets: [
+              {
+                label: "Titik Pengamatan (h, tf²)",
+                data: [],
+                backgroundColor: "#4f46e5",
+                borderColor: "#3730a3",
+                pointRadius: 6,
+                pointHoverRadius: 8,
+              },
+              {
+                label: "Garis Regresi Linear",
+                data: [],
+                type: "line",
+                borderColor: "#ef4444",
+                borderWidth: 2.5,
+                pointRadius: 0,
+                fill: false,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { position: "bottom", labels: { boxWidth: 12, font: { size: 10 } } },
+            },
+            scales: {
+              x: { title: { display: true, text: "Ketinggian h (meter)" } },
+              y: { title: { display: true, text: "Kuadrat Waktu tf² (s²)" } },
+            },
+          },
+        });
+      }
+
+      function updateM2Chart(xList, yList, m, nInt) {
+        if (!m2ChartInstance) initM2Chart();
+        const scatter = xList.map((x, i) => ({ x: x, y: yList[i] }));
+        const minX = Math.min(...xList);
+        const maxX = Math.max(...xList);
+        const line = [
+          { x: minX, y: m * minX + nInt },
+          { x: maxX, y: m * maxX + nInt },
+        ];
+        m2ChartInstance.data.datasets[0].data = scatter;
+        m2ChartInstance.data.datasets[1].data = line;
+        m2ChartInstance.update();
+      }
+
+      function downloadM2Chart() {
+        if (!m2ChartInstance) return;
+        const link = document.createElement("a");
+        link.download = "Grafik_Regresi_M2_Giroskop.png";
+        link.href = m2ChartInstance.toBase64Image("image/png", 1.0);
+        link.click();
+      }
+
+      function loadSampleM2() {
+        m2Data = [];
+        const sampleH = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0];
+        const sampleTf = [1.25, 1.76, 2.15, 2.48, 2.78, 3.05, 3.28, 3.51, 3.72, 3.92];
+        for (let i = 0; i < 10; i++) {
+          m2Data.push({ id: i + 1, h: sampleH[i], tf: sampleTf[i] });
+        }
+        renderM2Table();
+        calculateM2();
+      }
+
+      function resetM2() {
+        m2Data = [];
+        for (let i = 0; i < 5; i++) addM2Row();
+      }
+
+      // ==========================================
+      // ================ MODUL P1.1 ==============
+      // ==========================================
+      function calculateP1Balok() {
+        const pVal = parseFloat(document.getElementById("p1b-p").value) || 0;
+        const pUnit = parseFloat(document.getElementById("p1b-p-unit").value) || 0.001;
+        const p = pVal * pUnit;
+
+        const lVal = parseFloat(document.getElementById("p1b-l").value) || 0;
+        const lUnit = parseFloat(document.getElementById("p1b-l-unit").value) || 0.001;
+        const l = lVal * lUnit;
+
+        const tVal = parseFloat(document.getElementById("p1b-t").value) || 0;
+        const tUnit = parseFloat(document.getElementById("p1b-t-unit").value) || 0.001;
+        const t = tVal * tUnit;
+
+        const mVal = parseFloat(document.getElementById("p1b-m").value) || 0;
+        const mUnit = parseFloat(document.getElementById("p1b-m-unit").value) || 0.001;
+        const m = mVal * mUnit;
+
+        const outUnit = parseFloat(document.getElementById("p1b-out-unit").value) || 1;
+        const unitLabel = outUnit === 1 ? "kg/m³" : "g/cm³";
+
+        const rhoLitSI = 900;
+        const deltaM = 0.00005; // 0.05 g
+        const deltaP = 0.000005; // 0.005 mm
+        const deltaL = 0.000005;
+        const deltaT = 0.000005;
+
+        if (p > 0 && l > 0 && t > 0 && m > 0) {
+          const rhoSI = m / (p * l * t);
+          const drhoSI = (1 / (p * l * t)) * deltaM + (m / (p * p * l * t)) * deltaP + (m / (p * l * l * t)) * deltaL + (m / (p * l * t * t)) * deltaT;
+          const err = Math.abs((rhoLitSI - rhoSI) / rhoLitSI) * 100;
+
+          const rhoOut = rhoSI * outUnit;
+          const drhoOut = drhoSI * outUnit;
+
+          document.getElementById("p1b-res-rho").innerText = `${rhoOut.toFixed(2)} ${unitLabel}`;
+          document.getElementById("p1b-res-drho").innerText = `± ${drhoOut.toFixed(2)} ${unitLabel}`;
+          document.getElementById("p1b-res-err").innerText = err.toFixed(2) + " %";
+
+          document.getElementById("p1b-report-text").innerText = `=== ANALISIS DATA: P1.1 KERAPATAN BALOK KAYU ===
+p = ${p} m, l = ${l} m, t = ${t} m, m = ${m} kg
+Kerapatan Balok (ρ) = ${rhoSI.toFixed(2)} kg/m³
+Ketelitian (Δρ)     = ${drhoSI.toFixed(2)} kg/m³
+%Error terhadap Literatur (900 kg/m³) = ${err.toFixed(2)} %
+
+Format Pelaporan Akhir:
+ρ = (ρ ± Δρ)
+ρ = (${rhoOut.toFixed(2)} ± ${drhoOut.toFixed(2)}) ${unitLabel}`;
+        }
+      }
+
+      function loadSampleP1Balok() {
+        document.getElementById("p1b-p").value = "50.2";
+        document.getElementById("p1b-l").value = "24.5";
+        document.getElementById("p1b-t").value = "15.0";
+        document.getElementById("p1b-m").value = "16.5";
+        calculateP1Balok();
+      }
+
+      // ==========================================
+      // ================ MODUL P1.2 ==============
+      // ==========================================
+      function calculateP1Silinder() {
+        const dVal = parseFloat(document.getElementById("p1s-d").value) || 0;
+        const dUnit = parseFloat(document.getElementById("p1s-d-unit").value) || 0.001;
+        const d = dVal * dUnit;
+
+        const tVal = parseFloat(document.getElementById("p1s-t").value) || 0;
+        const tUnit = parseFloat(document.getElementById("p1s-t-unit").value) || 0.001;
+        const t = tVal * tUnit;
+
+        const mVal = parseFloat(document.getElementById("p1s-m").value) || 0;
+        const mUnit = parseFloat(document.getElementById("p1s-m-unit").value) || 0.001;
+        const m = mVal * mUnit;
+
+        const outUnit = parseFloat(document.getElementById("p1s-out-unit").value) || 1;
+        const unitLabel = outUnit === 1 ? "kg/m³" : "g/cm³";
+
+        const rhoLitSI = 7900;
+        const deltaM = 0.00005; // 0.05 g
+        const deltaD = 0.000025; // 0.025 mm
+        const deltaT = 0.000025;
+
+        if (d > 0 && t > 0 && m > 0) {
+          const rhoSI = (4 * m) / (Math.PI * d * d * t);
+          const drhoSI = (4 / (Math.PI * d * d * t)) * deltaM + ((8 * m) / (Math.PI * d * d * d * t)) * deltaD + ((4 * m) / (Math.PI * d * d * t * t)) * deltaT;
+          const err = Math.abs((rhoLitSI - rhoSI) / rhoLitSI) * 100;
+
+          const rhoOut = rhoSI * outUnit;
+          const drhoOut = drhoSI * outUnit;
+
+          document.getElementById("p1s-res-rho").innerText = `${rhoOut.toFixed(2)} ${unitLabel}`;
+          document.getElementById("p1s-res-drho").innerText = `± ${drhoOut.toFixed(2)} ${unitLabel}`;
+          document.getElementById("p1s-res-err").innerText = err.toFixed(2) + " %";
+
+          document.getElementById("p1s-report-text").innerText = `=== ANALISIS DATA: P1.2 KERAPATAN SILINDER LOGAM ===
+d = ${d} m, t = ${t} m, m = ${m} kg
+Kerapatan Silinder (ρ) = ${rhoSI.toFixed(2)} kg/m³
+Ketelitian (Δρ)        = ${drhoSI.toFixed(2)} kg/m³
+%Error terhadap Literatur (7900 kg/m³) = ${err.toFixed(2)} %
+
+Format Pelaporan Akhir:
+ρ = (ρ ± Δρ)
+ρ = (${rhoOut.toFixed(2)} ± ${drhoOut.toFixed(2)}) ${unitLabel}`;
+        }
+      }
+
+      function loadSampleP1Silinder() {
+        document.getElementById("p1s-d").value = "18.5";
+        document.getElementById("p1s-t").value = "45.0";
+        document.getElementById("p1s-m").value = "96.0";
+        calculateP1Silinder();
+      }
+
+      // ==========================================
+      // ================ MODUL P1.3 ==============
+      // ==========================================
+      function calculateP1Pasir() {
+        const m1Val = parseFloat(document.getElementById("p1p-m1").value) || 0;
+        const m1Unit = parseFloat(document.getElementById("p1p-m1-unit").value) || 0.001;
+        const m1 = m1Val * m1Unit;
+
+        const m2Val = parseFloat(document.getElementById("p1p-m2").value) || 0;
+        const m2Unit = parseFloat(document.getElementById("p1p-m2-unit").value) || 0.001;
+        const m2 = m2Val * m2Unit;
+
+        const m3Val = parseFloat(document.getElementById("p1p-m3").value) || 0;
+        const m3Unit = parseFloat(document.getElementById("p1p-m3-unit").value) || 0.001;
+        const m3 = m3Val * m3Unit;
+
+        const m4Val = parseFloat(document.getElementById("p1p-m4").value) || 0;
+        const m4Unit = parseFloat(document.getElementById("p1p-m4-unit").value) || 0.001;
+        const m4 = m4Val * m4Unit;
+
+        const rhoAir = 1000;
+        const rhoLit = 1850;
+        const dm = 0.00005;
+
+        const denom = m2 - m1 - (m4 - m3);
+        if (denom !== 0 && m1 > 0 && m2 > 0 && m3 > 0 && m4 > 0) {
+          const rho = ((m3 - m1) / denom) * rhoAir;
+
+          const dRho_dm1 = Math.abs((rhoAir * (m4 - m2)) / (denom * denom));
+          const dRho_dm2 = Math.abs((rhoAir * (m1 - m3)) / (denom * denom));
+          const dRho_dm3 = Math.abs((rhoAir * (m2 - m4)) / (denom * denom));
+          const dRho_dm4 = Math.abs((rhoAir * (m3 - m1)) / (denom * denom));
+
+          const drho = (dRho_dm1 + dRho_dm2 + dRho_dm3 + dRho_dm4) * dm;
+          const err = Math.abs((rhoLit - rho) / rhoLit) * 100;
+
+          document.getElementById("p1p-res-rho").innerText = rho.toFixed(2) + " kg/m³";
+          document.getElementById("p1p-res-drho").innerText = "± " + drho.toFixed(2) + " kg/m³";
+          document.getElementById("p1p-res-err").innerText = err.toFixed(2) + " %";
+
+          document.getElementById("p1p-report-text").innerText = `=== ANALISIS DATA: P1.3 KERAPATAN PASIR ===
+m1 = ${m1} kg, m2 = ${m2} kg, m3 = ${m3} kg, m4 = ${m4} kg
+Kerapatan Pasir (ρ) = ${rho.toFixed(2)} kg/m³
+Ketelitian (Δρ)     = ${drho.toFixed(2)} kg/m³
+%Error terhadap Literatur (1850 kg/m³) = ${err.toFixed(2)} %
+
+Format Pelaporan Akhir:
+ρ = (ρ ± Δρ) kg/m³
+ρ = (${rho.toFixed(2)} ± ${drho.toFixed(2)}) kg/m³`;
+        }
+      }
+
+      function loadSampleP1Pasir() {
+        document.getElementById("p1p-m1").value = "32.1";
+        document.getElementById("p1p-m2").value = "82.5";
+        document.getElementById("p1p-m3").value = "58.3";
+        document.getElementById("p1p-m4").value = "98.8";
+        calculateP1Pasir();
+      }
+
+      // ==========================================
+      // ================ MODUL P1.4 ==============
+      // ==========================================
+      let p1spRiders = [];
+
+      function addP1SpirtusRider(m = 5, l = 8) {
+        const id = Date.now() + Math.random();
+        p1spRiders.push({ id, m, l });
+        renderP1SpirtusRiders();
+        calculateP1Spirtus();
+      }
+
+      function removeP1SpirtusRider(id) {
+        if (p1spRiders.length > 1) {
+          p1spRiders = p1spRiders.filter((r) => r.id !== id);
+          renderP1SpirtusRiders();
+          calculateP1Spirtus();
+        }
+      }
+
+      function renderP1SpirtusRiders() {
+        const container = document.getElementById("p1sp-riders-container");
+        container.innerHTML = "";
+        p1spRiders.forEach((r, idx) => {
+          container.innerHTML += `
+          <div class="flex items-center gap-2 p-2 bg-slate-50 border border-slate-200 rounded-lg text-xs">
+            <span class="font-bold text-pink-700 w-20">Beban ${idx + 1}:</span>
+            <div class="flex items-center gap-1">
+              <label class="text-[11px] text-slate-500">Massa $m_${idx + 1}$ (g):</label>
+              <input type="number" step="any" value="${r.m}" oninput="updateP1SpRider(${idx}, 'm', this.value)" class="w-20 px-2 py-1 bg-white border border-slate-300 rounded" />
+            </div>
+            <div class="flex items-center gap-1">
+              <label class="text-[11px] text-slate-500">Lengan $l_${idx + 1}$ (cm):</label>
+              <input type="number" step="any" value="${r.l}" oninput="updateP1SpRider(${idx}, 'l', this.value)" class="w-20 px-2 py-1 bg-white border border-slate-300 rounded" />
+            </div>
+            <button onclick="removeP1SpirtusRider(${r.id})" class="ml-auto text-rose-500 hover:text-rose-700 p-1"><i class="fa-solid fa-trash-can"></i></button>
+          </div>
+        `;
+        });
+        renderLatex();
+      }
+
+      function updateP1SpRider(idx, field, val) {
+        p1spRiders[idx][field] = val;
+        calculateP1Spirtus();
+      }
+
+      function calculateP1Spirtus() {
+        // Input Volume dalam ml (cm³)
+        const V = parseFloat(document.getElementById("p1sp-v").value) || 0;
+
+        // Pilihan satuan output (gr/cm³ atau kg/m³)
+        const outUnitSelect = document.getElementById("p1sp-out-unit");
+        const isCGS = !outUnitSelect || outUnitSelect.value === "cgs"; // default gr/cm³
+        // Nilai Literatur
+        const rhoLit = isCGS ? 0.82 : 820; // 0.82 gr/cm³ atau 820 kg/m³
+        const unitLabel = isCGS ? "gr/cm³" : "kg/m³";
+        // Ketelitian alat ukur dalam satuan CGS (g, cm, ml)
+        const dm = 0.005; // 1/2 ketelitian Neraca Mohr (0.01 g) = 0.005 g
+        const dl = 0.05; // 1/2 ketelitian mistar skala lengan (1 mm = 0.1 cm) = 0.05 cm
+        const dV = 0.125; // 1/2 ketelitian Gelas Ukur 25 ml (0.25 ml) = 0.125 ml (cm³)
+        let sumML = 0;
+        let drhoSum = 0;
+        p1spRiders.forEach((r) => {
+          const m = parseFloat(r.m) || 0; // dalam gram (g)
+          const l = parseFloat(r.l) || 0; // dalam cm
+          sumML += m * l;
+          if (V > 0) {
+            // Turunan parsial terhadap m_i dan l_i
+            drhoSum += (l / (10 * V)) * dm + (m / (10 * V)) * dl;
+          }
+        });
+        if (V > 0 && sumML > 0) {
+          // Kerapatan dalam gr/cm³
+          let rho = sumML / (10 * V);
+          // Ketidakpastian dalam gr/cm³
+          let drho = drhoSum + (sumML / (10 * V * V)) * dV;
+          // Jika user memilih satuan kg/m³, konversi (dikali 1000)
+          if (!isCGS) {
+            rho *= 1000;
+            drho *= 1000;
+          }
+          // Persentase Error
+          const err = Math.abs((rhoLit - rho) / rhoLit) * 100;
+          // Tampilkan hasil ke UI
+          document.getElementById("p1sp-res-rho").innerText = `${rho.toFixed(4)} ${unitLabel}`;
+          document.getElementById("p1sp-res-drho").innerText = `± ${drho.toFixed(4)} ${unitLabel}`;
+          document.getElementById("p1sp-res-err").innerText = `${err.toFixed(2)} %`;
+
+          document.getElementById("p1sp-report-text").innerText = `=== ANALISIS DATA: P1.4 KERAPATAN SPIRTUS ===
+Jumlah Beban Penunggang = ${p1spRiders.length}
+Perubahan Volume (V)   = ${V} ml (cm³)
+Kerapatan Spirtus (ρ)  = ${rho.toFixed(4)} ${unitLabel}
+Ketelitian (Δρ)        = ${drho.toFixed(4)} ${unitLabel}
+Literatur Spirtus      = ${rhoLit} ${unitLabel}
+%Error terhadap Literatur = ${err.toFixed(2)} %
+Format Pelaporan Akhir:
+ρ = (ρ ± Δρ)
+ρ = (${rho.toFixed(4)} ± ${drho.toFixed(4)}) ${unitLabel}`;
+        }
+      }
+
+      function loadSampleP1Spirtus() {
+        document.getElementById("p1sp-v").value = "5.0"; // 5 ml
+        p1spRiders = [
+          { id: 1, m: 5.0, l: 8.0 }, // Beban 1: 5 g di posisi lengan 8 cm
+          { id: 2, m: 0.5, l: 4.0 }, // Beban 2: 0.5 g di posisi lengan 4 cm
+        ];
+        renderP1SpirtusRiders();
+        calculateP1Spirtus();
+      }
+
+      // ==========================================
+      // ============ DOM INITIALIZATION ==========
+      // ==========================================
+      document.addEventListener("DOMContentLoaded", () => {
+        loadSampleM3();
+        loadSampleM2();
+        loadSampleP1Balok();
+        loadSampleP1Silinder();
+        loadSampleP1Pasir();
+        loadSampleP1Spirtus();
+        renderLatex();
+      });
+    </script>
+  </body>
+</html>
